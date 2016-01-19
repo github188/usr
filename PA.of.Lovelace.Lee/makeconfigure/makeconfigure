@@ -23,7 +23,6 @@ function print_help()
     echo "        (PROJECT_TYPE=c|c++):                default [c]"
     echo "        (CXX|cxx):                           c++ project"
     echo "        (C|c):                               c project"
-    
     echo "        (-help|--help):                      show help information"
     echo "        (-exec|-liba|-libso):                default [-exec]"
     echo "        (-publish):                          c project"
@@ -31,6 +30,7 @@ function print_help()
     echo "        (-L\"path\"):                        Add one lib path."
     echo "        (-DDEFINITION):                      Add one macro definition."
     echo "        (-lLIBNAME):                         Add one lib link option."
+    echo "        (-Wl,-rpath=./deps:.:/usr):          Support gcc -Wl,rpath."
     echo ""
 }
 
@@ -73,7 +73,7 @@ function parseARGS()
                 CROSS_COMPILER=$rvalue;;
             INSTALL)
                 INSTALL_DIR=$rvalue;;
-            -Werror|-g|-std) #支持的配置项
+            -Werror|-g|-std|-Wl,-rpath) #支持的配置项
                 m_a_k_e_o_p_t_i_o_n=._._.;;
             *) 
                 arg=${lvalue:0:2}
@@ -204,9 +204,13 @@ do
                 CCFLAGS=$CCFLAGS\ -std=$rvalue
                 CXXFLAGS=$CXXFLAGS\ -std=$rvalue
             ;; 
+            -Wl,-rpath)
+                LDFLAGS=$LDFLAGS\ $arg
+            ;;
         esac
     fi
 done
+echo "Update linker flags as \"$LDFLAGS\""
 echo "Set C compiler flags \"$CCFLAGS\""
 echo "Set C++ compiler flags \"$CXXFLAGS\""
 generatemakefile $PROJECT_TYPE $PUB_RELEASE $BUILDING_TYPE $PROJECT_NAME; 
