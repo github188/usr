@@ -5,6 +5,9 @@ if [[ $UID -ne 0 ]];then
 	exit
 fi
 
+if [ ! -z $1 ];then
+	cp $1 env -vf
+fi
 source /etc/profile
 
 if [[ ! $LOVELACE_ENV == "" ]];then
@@ -12,15 +15,18 @@ if [[ ! $LOVELACE_ENV == "" ]];then
 	exit;
 fi
 
-echo "PATH=\$PATH:/usr/local/bin/lovelacelee:/usr/local/bin/lovelacelee/bin/" >> /etc/profile
-echo "set profile PATH=$PATH"
 
 if [ ! -f env ];then
 	echo "env is not exist"
 	exit;
 fi
 
+echo "set profile PATH=$PATH"
+echo "PATH=\$PATH:/usr/local/bin/lovelacelee:/usr/local/bin/lovelacelee/bin/" >> /etc/profile
 echo "install env"
 cat ./env >> /etc/profile
 
 echo "install ok"
+
+source /etc/profile
+rm env -f
