@@ -1,0 +1,4 @@
+#!/bin/sh
+
+
+valgrind --log-file=valgrind_log --leak-check=full --track-fds=yes  --leak-check=full --show-reachable=yes $1

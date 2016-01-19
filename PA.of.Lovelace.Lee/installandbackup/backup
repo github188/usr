@@ -1,0 +1,81 @@
+#!/bin/sh
+################################################################################
+# Copyright (C), 2000-2014,  Electronic Technology Co., Ltd.
+# Filename :   backup
+# Author   :   Lovelace Lee
+# Version  :   1.1.1
+# Date     :   2014-5-23
+# BriefInfo:   back file or directory to /mnt/hgfs/backup
+################################################################################
+
+DATE=$(date +"%Y%m%d")
+backup_dir=
+
+filelist=
+PWD=$(pwd)
+name=$1
+tarfile=$name.$DATE.tar.bz2
+
+ddir="backup" #/mnt/hgfs/backup is requested fo backup tool
+CUR_DIR=$(pwd -P)
+
+filelist=$*
+filelist=${filelist#* }
+echo $filelist
+ 
+ 
+###
+ # Function :  Search directories
+ #             
+ # InputArg :  
+ #             
+ # OutputArg:  
+ # ReturnVal:  
+###
+function findDir()
+{
+    workdir=$1
+    list=`ls ${workdir}`
+    for ford in $list
+    do
+        if [ -d $workdir/$ford ];then
+            if [ $ford == $ddir ];then
+                backup_dir=${workdir}/$ford
+                return 0
+            fi
+        fi
+    done
+    echo $backup_dir
+    if [ -z $backup_dir ];then
+        echo "Not found backup directory"
+    fi
+}
+
+ 
+###
+ # Function :  backup files
+ #             
+ # InputArg :  
+ #             
+ # OutputArg:  
+ # ReturnVal:  
+###
+function backup()
+{
+    tar jcvf $tarfile $filelist --exclude-vcs
+    echo "Find \"backup\" int /mnt/hgfs."
+    workdir="/mnt/hgfs"
+    findDir $workdir
+    echo "Backup tool in \"$backup_dir\""
+    rm -vi $backup_dir/${name}.*.tar.bz2
+    cp -v $tarfile $backup_dir
+    rm -rf $tarfile
+}
+
+if [[ $# -lt 1 ]];then
+    echo "Usage:    backup [filename] [filelist]"
+    echo 
+else
+    backup;
+fi
+

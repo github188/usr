@@ -1,0 +1,44 @@
+#!/bin/bash
+
+if [ $UID -ne 0 ];then
+    echo "!! Root permission is requested"
+    exit
+fi
+
+source /etc/profile
+
+PA_TOOL_DIR=/usr/local/bin/lovelacelee
+
+echo -ne "\033[32;32;5mLOVELACE_ENV: $LOVELACE_ENV \n"
+
+
+if [[ -d $PA_TOOL_DIR ]];then
+	echo -ne "\033[35;35;5mCurrent support tools:\n\033[34;34;5m"
+	ls $PA_TOOL_DIR
+	echo -ne "\033[0m"
+else
+    echo "PA tools not installed."
+fi
+
+
+for arg in $*
+do
+    lvalue=`echo $arg | sed 's/=.*//g'`
+    rvalue=`echo $arg | sed 's/.*=//g'`
+    if [ -n "$arg" ];then #arg exist
+        case $lvalue in
+        -d)
+            if [[ $LOVELACE_BIN_DIR == "" ]];then
+                echo -ne "\033[31;31;5menv LOVELACE_BIN_DIR not valid \n\033[0m"
+                exit
+            fi
+            deltool_path=${LOVELACE_BIN_DIR}/${rvalue}
+            echo "delete tool ${deltool_path}"
+            rm -v ${deltool_path}
+            ;;
+         -h)
+            echo "Usage: lovelace [-d=deletetoolname]"
+         ;;
+        esac
+    fi
+done

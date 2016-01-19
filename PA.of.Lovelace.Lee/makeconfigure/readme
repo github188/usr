@@ -1,0 +1,27 @@
+================================
+#在源码目录下生成makefile工程文件
+#所有的头文件目录均命名为include
+#所有的库目录均命名为lib
+
+================================
+#功能说明：递归查找项目根目录及其子目录下所有的include目录列表作为-I选项
+#          递归查找项目根目录及其子目录下所有的lib目录列表作为-L选项
+#          递归查找项目根目录及其子目录下所有的目录，并在其中生成c/c++项目的makefile
+#          生成主makefile管理所有的OBJS文件列表
+
+#支持选项：
+Usage:  configure [args...]
+        (PROJECT_TYPE=c|c++):                default [c]
+        (PROJECT_NAME=main):                 default [main]
+        (CROSS_COMPILER=arm-linux-):         default []
+        (INSTALL=/usr/loca/bin):             default [./bin]
+        (-exec|-liba|-libso):                default [-exec]
+        (-useobjsdir):                       use objs dir for building
+        (-help|--help):                      show help information
+
+================================
+
+可执行文件编译完成后strip
+如果是加了-g生成可调试的文件,那不能使用strip,这样会除去调试信息.
+
+#修正安装目录与版本发布目录

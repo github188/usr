@@ -1,0 +1,79 @@
+#!/bin/sh
+
+#不跟参数，仅备份到PA.of.Lovelace.Lee文件夹，在/mnt/hgfs下
+#跟参数，仅将参数文件列表安装到安装目录/usr/local/bin/lovelacelee
+#需要将此目录添加到/etc/profile的PATH中
+
+
+DATE=$(date +"%Y%m%d")
+backup_dir=
+install_dir=/usr/local/bin/lovelacelee
+
+filelist=
+PWD=$(pwd)
+name=${PWD##*/}
+tarfile=$name.$DATE.tar.bz2
+onlyinstall=N
+
+ddir="PA.of.Lovelace.Lee"
+CUR_DIR=$(pwd -P)
+
+if [[ -z $* ]];then
+    filelist=`ls`
+    onlyinstall=N
+else
+    filelist=$*
+    onlyinstall=Y
+fi
+
+function findDir()
+{
+    workdir=$1
+    list=`ls ${workdir}`
+    for ford in $list
+    do
+#		if [ ${ford:0:1} == "." ];then
+#			echo "Jump .svn directory"
+#			continue;
+#		fi
+        if [ -d $workdir/$ford ];then
+            if [ $ford == $ddir ];then
+                backup_dir=${workdir}/$ford
+                return 0
+            fi
+        fi
+    done
+    echo $backup_dir
+    if [ -z $backup_dir ];then
+        echo "Not found backup directory"
+    fi
+}
+
+function backup()
+{
+    tar jcvf $tarfile $filelist --exclude-vcs
+    echo "Find \"PA.of.Lovelace.Lee\" int /mnt/hgfs."
+    workdir="/mnt/hgfs"
+    findDir $workdir
+    echo "Backup tool in \"$backup_dir\""
+	rm -iv $backup_dir/${name}.*.tar.bz2
+    cp -v $tarfile $backup_dir
+    rm -rf $tarfile
+}
+
+function install()
+{
+    if [[ ! -d $install_dir ]];then
+        mkdir -p $install_dir
+    fi
+    echo "Install tool ... "
+    cp -rvf $filelist $install_dir
+    echo "Done."
+}
+
+if [ $onlyinstall == "Y" ];then
+    install;
+else
+    backup;
+fi
+

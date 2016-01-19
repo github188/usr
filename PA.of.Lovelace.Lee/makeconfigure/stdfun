@@ -1,0 +1,489 @@
+#!/bin/bash
+
+
+#Global variables
+#全局变量
+
+export PWD=`pwd -P`
+export PDIR=`cd .. && pwd -P`
+export PROJECT_DIR=$(pwd -P)
+export DATE=$(date +"%Y-%m-%d")
+export TIME=$(date +"%H:%M:%S")
+export DT=$(date +"%Y-%m-%d_%H:%M:%S")
+export FN_RULES=rules.mk
+export FN_MAKEFILE_PDIR=.makefile
+export FN_MAKEFILE=makefile
+
+#文件及目录列表
+export SUBDIRLIST=$PROJECT_DIR  #contain project directory
+export ALLFILELIST=
+export SRC_FILE_LIST=
+export ALL_SRC_FILE_LIST=
+
+#编译器选项
+export INCS=
+export LIBS=
+export OBJSLIST=
+export CC=gcc
+export CXX=g++
+export AR=ar
+export STRIP=strip
+export USESTRIP=Y
+export CCFLAGS="-Wall -O3 -Wno-psabi"                  #ignore note: the mangling of 'va_list' has changed in GCC 4.4
+export CXXFLAGS="-Wall -O3 -Wno-psabi"
+export LDFLAGS=
+export CLIBFlAGS="-fPIC"
+# ar [--plugin name] [-X32_64] [-]p[mod [relpos] [count]] archive [member...]
+# c -> 如果该库不存在, 则有些版本的 ar 必须指定 c 选项, 才会进行创建, GNU ar 不需要.
+# r -> 将参数 member 中指定的成员插入到归档文件中, 替换掉归档文件中原来的同名成员.
+#      即先删除原来同名的成员, 然后将新成员插入到归档文件中.
+#      默认情况下, 新插入的成员会被添加到归档文件的末尾, 但可以通过选项'a','b'或'i'指明插入的位置.
+# a -> 在归档文件中一个已经存在的成员后面增加由参数 member 给出的新文件.
+#      如果使用选项'a', 则应该为命令行参数 member 指定一个已经存在的成员名(即给出参数 relpos).
+# b -> 在归档文件中一个已经存在的成员前面增加由参数 member 给出的新文件.
+#      如果使用任选项'b', 则应该为命令行参数 member 指定一个已经存在的成员名(即给出参数 relpos).
+# i -> 在归档文件中一个已经存在的成员前面增加一个新的文件.
+#      如果使用任选项i, 则应该为命令行参数 member指定一个已经存在的成员名(即给出参数 relpos).
+# q -> 快速追加, 即将参数 member 中给出的成员追加到归档文件的末尾, 而不检查是否要进行替换, 也不更新符号表索引.
+# s -> 写入一个目标文件索引到归档文件中, 或者更新一个存在的目标文件索引.
+export LDLIBAFLAGS="crs"                               #crq
+export LDLIBSOFLAGS="-shared"
+export LDUSESTAIC="-static"
+export DEFS=
+export CROSS_COMPILER=
+
+#关键配置
+export BUILDING_TYPE=exec
+export PROJECT_TYPE=c                                  #c/c++
+export PROJECT_NAME=main
+export PUB_RELEASE=Y                                   #默认创建发布目录
+
+#版本目录
+export RELEASE_DIR=$PROJECT_DIR                       #默认为工程目录, 视工程创建bin或者release目录
+
+#安装目录
+export INSTALL_DIR=/usr/local/bin/lovelacelee          #默认值
+
+#Global variable
+export isnull_project=0
+
+#Global functions
+#查找包含根目录的所有子目录
+#$1 directory
+#SUBDIRLIST all sub directories list is global variable
+#FILELIST all file list
+function findSubDirs()
+{
+    workdir=$1
+    cd $workdir
+    list=`ls `
+    for ford in $list
+    do
+        if [ -d $ford ];then
+            isgeneratemakefile $PWD/$ford
+            if [ $? == 4 ];then
+                export SUBDIRLIST=$SUBDIRLIST,$PWD/$ford
+                export SUBDIRLIST=${SUBDIRLIST//,/ }
+            fi
+            findSubDirs $ford
+            cd ..
+        else
+            export FILELIST=$ALLFILELIST,$PWD/$ford
+            export FILELIST=${ALLFILELIST//,/ }
+        fi
+    done
+}
+#检测是否空工程
+#check if null src file project
+#return 4 means project without src file
+#return 84 means project can compile
+function isnullproject()
+{
+    workdir=$1
+    cd $workdir
+    list=`ls `
+    for ford in $list
+    do
+        if [ -d $ford ];then
+            isnullproject $ford
+            cd ..
+        else
+            suffix=${ford##*.}
+            #echo $suffix
+            case $suffix in
+                c|cpp)
+                isnull_project=1
+                ;;
+            esac
+        fi
+    done
+    if [[ $isnull_project == "1" ]];then
+        return 84
+    else
+        return 4
+    fi
+}
+#获取包括根目录下的所有源文件列表
+#$1 directory
+#$2 "c" or "c++"
+#OBJSLIST all *.o file list with path
+function getOBJSLIST()
+{
+    workdir=$1
+    if [[ $2 == "c++" ]];then
+        ftype="cpp"
+    elif [[ $2 == "c" ]];then
+        ftype="c"
+    fi
+
+    cd $workdir
+    list=`ls `
+    for ford in $list
+    do
+        if [ -d $ford ];then
+            getOBJSLIST $ford
+            cd ..
+        else
+            if [[ ${ford##*.} == $ftype ]];then
+                file=$PWD/$ford
+                objfile=${file%%.*}
+                export OBJSLIST=$OBJSLIST,${objfile}.o
+                export OBJSLIST=${OBJSLIST//,/ }
+            fi
+        fi
+    done
+}
+#查找include目录获取include目录列表
+#$1 directory
+#INCS all include directories with -I prefix
+function findINCS()
+{
+    workdir=$1
+    cd $workdir
+    list=`ls`
+    for ford in $list
+    do
+        if [ -d $ford ];then
+            if [ $ford == "include" ];then
+                export INCS=$INCS,-I\"$PWD/$ford\"
+                export INCS=${INCS//,/ }
+                findINCS $ford
+                cd ..
+            else
+                findINCS $ford
+                cd ..
+            fi
+                
+        fi
+    done
+}
+#查找lib目录，获取lib目录列表
+#$1 direcotry
+#LIBS all lib directories with -L option
+function findLIBS()
+{
+    workdir=$1
+    cd $workdir
+    list=`ls`
+    for ford in $list
+    do
+        if [ -d $ford ];then
+            if [ $ford == "lib" ];then
+                export LIBS=$LIBS,-L\"$PWD/$ford\"
+                export LIBS=${LIBS//,/ }
+                findLIBS $ford
+                cd ..
+            else
+                findLIBS $ford
+                cd ..
+            fi
+        fi
+    done
+}
+#加文件头
+#create and add version head
+function addVersionHead()
+{
+    echo "############################################" > $1
+    echo "# Auto generated by configure tool." >> $1
+    echo "# Copyright by Lovelace.Lee." >> $1
+    echo "# Building time ${DATE}-${TIME}." >> $1
+    echo "############################################" >> $1
+}
+
+#判断目录是否需要产生makefile文件，没有源文件则不生成makefile
+#whether generate makefile in $1
+function isgeneratemakefile()
+{
+    workdir=$1
+    tag=0
+    filelist=`ls $workdir`
+    for file in $filelist
+    do
+        if [ ! -d $file ];then
+            isSrcFile $file
+            if [ $? == 4 ];then
+                tag=1
+            fi
+        fi
+    done
+    if [ $tag == 1 ];then
+        return 4
+    else
+        return 84
+    fi
+}
+#检测是否是支持的源文件
+function isSrcFile()
+{
+    type=${1##*.}
+    if [ $type == "c" ] || [ $type == "cpp" ];then
+        return 4
+    else
+        return 84
+    fi
+}
+
+#获取当前目录下的所有源文件列表
+#get *.c and *.cpp file list
+#current dir
+#SRC_FILE_LIST src file list in current dir
+#ALL_SRC_FILE_LIST all src file list used for main rules
+function getSrcFileList()
+{
+    list=`ls`
+    SRC_FILE_LIST=
+    for file in $list
+    do
+        isSrcFile $file
+        if [ $? == 4 ];then
+            SRC_FILE_LIST=$SRC_FILE_LIST,$file
+            ALL_SRC_FILE_LIST=$ALL_SRC_FILE_LIST,$PWD/$file
+            SRC_FILE_LIST=${SRC_FILE_LIST//,/ }
+            ALL_SRC_FILE_LIST=${ALL_SRC_FILE_LIST//,/}
+        fi
+    done
+}
+#在目录中生成makefile，如果是主目录，生成.makefile
+#generate makefile in folder
+#$1 folder
+#$2 project type: c/c++ default[c]
+#$3 "exec" or "liba" or "libso"
+function generatemakefileinfolder()
+{
+    workdir=$1
+    if [ $workdir == $PROJECT_DIR ];then
+        makefile=$FN_MAKEFILE_PDIR  #project directory has main makefile so src makefile named .makefile
+    else
+        makefile=$FN_MAKEFILE
+    fi
+    echo -ne "generating ${workdir}/${makefile} ... "
+    if [[ $2 == "c++" ]];then
+        ftype="cpp"
+        compiler=$CXX
+        cflags=$CXXFLAGS
+    else
+        ftype="c"
+        compiler=$CC
+        cflags=$CCFLAGS
+    fi
+
+    if [[ $3 == "exec" ]];then # out put file
+        cflags=$cflags
+    elif [[ $3 == "liba" ]] || [[ $3 == "libso" ]];then
+        cflags=$cflags,$CLIBFlAGS
+        cflags=${cflags//,/ }
+    fi
+
+    cd $workdir
+    addVersionHead ${makefile}
+    
+    echo "SRCS := \$(wildcard *.${ftype})" >> $makefile
+    echo "OBJS := \$(patsubst %.${ftype}, %.o,\$(SRCS))" >> $makefile
+    echo "OBDS := \$(patsubst %.${ftype}, %.d,\$(SRCS))" >> $makefile
+    
+    echo "" >> $makefile
+
+    echo ".PHONY: all clean distclean" >> $makefile
+
+    echo "all:\$(OBJS)" >> $makefile
+ 
+    echo "%.o:%.${ftype}" >> $makefile
+    echo "	@echo \"Building file: \$(notdir \$<) ...\"" >> $makefile
+    #echo "	$compiler -c $cflags $DEFS $INCS -MMD -MP -MF\"\$(@:%.o=%.d)\" -MT\"\$(@:%.o=%.d)\" -o\"\$@\" \"\$<\"" >> $makefile
+    echo "	$compiler -c $cflags $DEFS $INCS -o\"\$@\" \"\$<\"" >> $makefile
+    echo "	@echo \"Finished building: \$(notdir \$@)\"" >> $makefile
+    
+
+    echo "clean:" >> $makefile
+    echo "	rm -rf \$(OBJS) \$(OBDS)" >> $makefile
+    echo "distclean:" >> $makefile
+    echo "	\$(MAKE) clean" >> $makefile
+    echo "	rm -f ${makefile}" >> $makefile
+    
+    echo -ne "done\n"
+}
+
+#生成主makefile
+#generate Main makefile
+#$1 "c" or "c++" project type [c/c++]
+#$2 "genobjsdir" or "Y" generate objs dir for compiler
+#$3 "exec" or "liba" or "libso"
+#$4 output filename
+function generatemakefile()
+{
+    main_makefile=$PROJECT_DIR/${FN_MAKEFILE}
+    
+    findINCS $PROJECT_DIR;
+    findLIBS $PROJECT_DIR;
+
+    projecttype=$1
+    if [[ $1 == "c++" ]];then #compiler & #cflags
+        compiler=$CXX
+        cflags=$CXXFLAGS
+    else
+        compiler=$CC
+        cflags=$CCFLAGS
+    fi
+
+    findSubDirs $PROJECT_DIR
+    objsdir=$SUBDIRLIST #all sub src dirs
+
+    liborexec=$3
+    if [[ $2 == "Y" ]];then 
+        if [[ $liborexec == "exec" ]];then         # bin dir
+            export RELEASE_DIR=$RELEASE_DIR/bin/
+        else                # release dir
+            export RELEASE_DIR=$RELEASE_DIR/release/
+        fi
+        mkdir -p $RELEASE_DIR
+    else
+        RELEASE_DIR=        #Not use publish directory
+    fi
+    
+    if [[ $liborexec == "exec" ]];then # out put file
+        a_out="$4"
+    elif [[ $liborexec == "liba" ]];then
+        a_out="lib$4.a"
+        libldflag=$LDLIBAFLAGS
+    elif [[ $liborexec == "libso" ]];then
+        a_out="lib$4.so"
+        libldflag=$LDLIBSOFLAGS
+    fi 
+
+    for dir in $objsdir
+    do
+        echo "OBJSDIR \"$dir\""
+        isgeneratemakefile $dir
+        if [ $? == 4 ];then
+            generatemakefileinfolder $dir $projecttype $liborexec
+        fi
+    done
+    getOBJSLIST $PROJECT_DIR $projecttype #根目录向下递归搜索
+    
+    echo "objsdir \"$objsdir\""
+    if [[ $objsdir == $PROJECT_DIR ]];then
+        echo "Only PROJECT_DIR has src file."
+        objsdir=$objsdir
+    #elif [[ -e $FN_MAKEFILE_PDIR ]];then
+    #   echo "PROJECT_DIR and subdirs have src file."
+    #   objsdir=$objsdir
+    else
+        echo "Maybe PROJECT_DIR and subdirs both have src file, but only give subdirs list."
+        objsdir=${objsdir/${PROJECT_DIR}/}
+    fi
+
+    echo -n "Configuring main_makefile..."
+    echo "###########################################################" > ${main_makefile}
+    echo "# Makefile of the project" >> ${main_makefile}
+    echo "# Auto generated by configure" >> ${main_makefile}
+    echo "# Build date $(date -R)" >> ${main_makefile}
+    echo "# Copyright by Lovelace.Lee. " >> ${main_makefile}
+    echo "###########################################################" >> ${main_makefile}
+
+    echo "" >> ${main_makefile}
+    echo "# All definition" >> ${main_makefile}
+
+    echo "" >> ${main_makefile}
+    echo "BUILDING_DIR=$objsdir" >> ${main_makefile}
+    
+    echo "" >> ${main_makefile}
+    echo ".PHONY: default all clean distclean build install run \$(BUILDING_DIR)" >> ${main_makefile}
+    echo "default: all" >> ${main_makefile}
+    echo "	@echo \"\"" >> ${main_makefile}
+    if [[ $liborexec == "liba" ]];then         #静太库链接
+        echo "	$AR $libldflag $RELEASE_DIR${a_out} $OBJSLIST" >> ${main_makefile}
+    else
+        echo "	$compiler $libldflag $LDFLAGS -o $RELEASE_DIR${a_out} $OBJSLIST $LIBS" >> ${main_makefile}
+    fi
+    echo "	@echo \"Buillding end state: success.\"" >> ${main_makefile}
+    echo "	\$(MAKE) --no-print-directory post-build" >> ${main_makefile}
+
+    if [[ $objsdir == $PROJECT_DIR ]];then # there is no sub src dirs
+        echo "all: " >> ${main_makefile}
+        echo "	\$(MAKE) \$@ -f $FN_MAKEFILE_PDIR" >> ${main_makefile}
+        echo "clean: " >> ${main_makefile}
+        echo "	\$(MAKE) \$@ -f $FN_MAKEFILE_PDIR" >> ${main_makefile}
+        echo "	rm -f $RELEASE_DIR${a_out}" >> ${main_makefile}
+        echo "" >> ${main_makefile}
+        echo "distclean: " >> ${main_makefile}
+        echo "	\$(MAKE) \$@ -f $FN_MAKEFILE_PDIR" >> ${main_makefile}
+        echo "	rm -f makefile" >> ${main_makefile}
+        echo "	rm -rf $RELEASE_DIR" >> ${main_makefile}
+        echo "	@echo \"Done.\"" >> ${main_makefile}
+    else
+        echo "all:" >> ${main_makefile}
+        if [ -e $FN_MAKEFILE_PDIR ];then
+            echo "$FN_MAKEFILE_PDIR is exist"
+            echo "	\$(MAKE) \$@ -f $FN_MAKEFILE_PDIR" >> ${main_makefile}
+        fi
+        echo "	@echo \"\"" >> ${main_makefile}
+        echo "	\$(MAKE) \$(BUILDING_DIR) TARGET=\$@" >> ${main_makefile}
+        echo "clean:" >> ${main_makefile}
+        if [ -e $FN_MAKEFILE_PDIR ];then
+            echo "	\$(MAKE) \$@ -f $FN_MAKEFILE_PDIR" >> ${main_makefile}
+        fi
+        echo "	@echo \"\"" >> ${main_makefile}
+        echo "	\$(MAKE) \$(BUILDING_DIR) TARGET=\$@" >> ${main_makefile}
+        echo "	rm -f $RELEASE_DIR${a_out}" >> ${main_makefile}
+        echo "" >> ${main_makefile}
+        echo "distclean:" >> ${main_makefile}
+        if [ -e $FN_MAKEFILE_PDIR ];then
+            echo "	\$(MAKE) \$@ -f $FN_MAKEFILE_PDIR" >> ${main_makefile}
+        fi
+        echo "	@echo \"\"" >> ${main_makefile}
+        echo "	\$(MAKE) \$(BUILDING_DIR) TARGET=\$@" >> ${main_makefile}
+        echo "	rm -f makefile" >> ${main_makefile}
+        echo "	rm -f $RELEASE_DIR${a_out}" >> ${main_makefile}
+        echo "	rm -rf $RELEASE_DIR" >> ${main_makefile}
+
+        echo "\$(BUILDING_DIR):" >> ${main_makefile}
+        echo "	\$(MAKE) -C \$@ \$(TARGET)" >> ${main_makefile}
+    fi
+    echo "build:" >> ${main_makefile}
+    echo "	\$(MAKE) clean" >> ${main_makefile}
+    echo "	\$(MAKE) default" >> ${main_makefile}
+    echo "run:" >> ${main_makefile}
+    echo "	\$(MAKE) default" >> ${main_makefile}
+    echo "	@echo \"**********************************************\"" >> ${main_makefile}
+    echo "	@echo \"*          Program running result            *\"" >> ${main_makefile}
+    echo "	@echo \"**********************************************\"" >> ${main_makefile}
+    echo "	@$RELEASE_DIR${a_out}" >> ${main_makefile}
+    echo "	@echo \"**********************************************\"" >> ${main_makefile}
+    echo "post-build:" >> ${main_makefile}
+    if [[ $3 == "exec" ]] && [[ $USESTRIP == Y ]];then #如果是库则不strip
+        echo "	$STRIP $RELEASE_DIR${a_out}" >> ${main_makefile}
+    fi
+    echo "	-@echo ' '" >> ${main_makefile}
+    echo "install:" >> ${main_makefile}
+    echo "	\$(MAKE) default" >> ${main_makefile}
+    if [ ! $INSTALL_DIR = "" ] && [ ! -d $INSTALL_DIR ];then
+        mkdir -p $INSTALL_DIR
+    fi
+    echo "	cp -f $RELEASE_DIR${a_out} ${INSTALL_DIR}/" >> ${main_makefile}
+    echo "	-@echo ' '" >> ${main_makefile}
+    
+    echo ".SECONDARY: post-build run" >> ${main_makefile}
+
+    echo "Done."
+}

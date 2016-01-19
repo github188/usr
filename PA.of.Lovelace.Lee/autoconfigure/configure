@@ -1,0 +1,95 @@
+#!/bin/bash
+#*******************************************************************************
+# Copyright (C), 2000-2014,  Electronic Technology Co., Ltd.
+# Filename:  configure
+# Author:    Lee
+# Version:   1.0.0
+# Date:      2014-5-21
+# BriefInfo: 
+#   配置所有N9M Storage的依赖头文件及库
+#   调用config.sh生成makefile
+#*******************************************************************************
+
+
+function print_help()
+{
+    echo ""
+    echo "Usage:  configure [args...]"
+    echo "        X5-III"
+    echo ""
+}
+
+#include std.sh
+#You can install this std.sh and config.sh to system envrionment
+#Use this command more convinient
+
+function findfile()
+{
+    filename=$1;
+    workdir=$2;
+    cd $workdir
+    list=`ls `
+    for ford in $list
+    do
+        if [ -d $ford ];then
+            findfile $filename $ford
+            cd ..
+        else
+            if [ $ford == $filename ];then
+                echo "$workdir/$ford"
+            fi
+        fi
+    done
+}
+_config_tool_=`findfile config.sh .`
+
+if [[ -e $_config_tool_ ]];then
+    echo "Config tool $_config_tool_"
+else
+    echo "Cannot find config tool"
+fi
+
+if [[ -e env ]];then
+    . ./env
+else
+    echo "Cannot find enviroment path file"
+    exit
+fi
+
+
+case $1 in
+X5-III)
+    echo "X5-III: configuration dir $STORAGE_SRC. "
+    . ${_config_tool_} \
+    PROJECT_NAME=Storage \
+    PROJECT_TYPE=c++ \
+    INSTALL=${RMPROJECT_Release}/bin \
+    CROSS_COMPILER=arm-hisiv100nptl-linux- \
+    -I${RMCBB_Release}/include \
+    -I${RMCBB_Release}/include/3521 \
+    -I${RMCBB_Release}/RMCBB_Common/Release/Common-arm-hisiv100/include \
+    -L${RMCBB_Release}/RMCBB_Common/Release/Common-arm-hisiv100 \
+    -I${RMCBB_Release}/RMCBB_DeviceManage/Release/DeviceScan-arm-hisiv100/include \
+    -L${RMCBB_Release}/RMCBB_DeviceManage/Release/DeviceScan-arm-hisiv100 \
+    -I${RMCBB_Release}/RMCBB_Filesystem/Release/rmfs-arm-hisiv100/include \
+    -L${RMCBB_Release}/RMCBB_Filesystem/Release/rmfs-arm-hisiv100 \
+    -I${RMCBB_Release}/RMCBB_SysConfig/Release/SysConfig-arm-hisiv100/include \
+    -L${RMCBB_Release}/RMCBB_SysConfig/Release/SysConfig-arm-hisiv100 \
+    -I${RMCBB_Release}/RMCBB_AssemblyFileHeader/Release/AssemblyFileHeader-arm-hisiv100/include \
+    -L${RMCBB_Release}/RMCBB_AssemblyFileHeader/Release/AssemblyFileHeader-arm-hisiv100 \
+    -I${RMCBB_Release}/RMCBB_Storage/RMCBB_MultiStreamSyncParser/Release/MultiStreamSyncParser-arm-hisiv100/include \
+    -L${RMCBB_Release}/RMCBB_Storage/RMCBB_MultiStreamSyncParser/Release/MultiStreamSyncParser-arm-hisiv100 \
+    -I${RMCBB_Release}/RMCBB_Storage/RMCBB_AviLibrary/Avi-arm-hisiv100/include \
+    -L${RMCBB_Release}/RMCBB_Storage/RMCBB_AviLibrary/Avi-arm-hisiv100 \
+    -I${RMCBB_Release}/RMCBB_Storage/RMCBB_FAT32Library/Fat32Tool-arm-hisiv100/include \
+    -L${RMCBB_Release}/RMCBB_Storage/RMCBB_FAT32Library/Fat32Tool-arm-hisiv100 \
+    -lCommon -lDeviceScan -lrmfs -lSysConfig -lmssp -lavi -lFat32Tool -lpthread -lAssemblyFileHeader \
+    -D_PLATFORM_LINX_
+    ;;  
+*)
+    print_help;
+    exit
+    ;;
+esac
+
+

@@ -1,0 +1,4 @@
+LOVELACE_ENV=PA.Lovelace.Lee
+LOVELACE_BACKUP_DIR=/mnt/hgfs/backup
+LOVELACE_BIN_DIR=/usr/local/bin/lovelacelee
+LOVELACE_PA_DIR=/mnt/hgfs/PA.of.Lovelace.Lee
