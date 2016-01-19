@@ -8,7 +8,6 @@ fi
 if [ ! -z $1 ];then
 	cp $1 env -vf
 fi
-source /etc/profile
 
 if [[ ! $LOVELACE_ENV == "" ]];then
 	echo "env already exist"
@@ -28,5 +27,9 @@ cat ./env >> /etc/profile
 
 echo "install ok"
 
-source /etc/profile
+echo "you must run `source /etc/profile` manually "
+echo LOVELACE_ENV: ${LOVELACE_ENV}
+echo LOVELACE_BACKUP_DIR: ${LOVELACE_BACKUP_DIR}
+echo LOVELACE_BIN_DIR: ${LOVELACE_BIN_DIR}
+echo LOVELACE_PA_DIR: ${LOVELACE_PA_DIR}
 rm env -f

@@ -5,7 +5,7 @@
 # Author   :   Lovelace Lee
 # Version  :   1.1.1
 # Date     :   2014-5-23
-# BriefInfo:   back file or directory to /mnt/hgfs/backup
+# BriefInfo:   back file or directory to ${LOVELACE_BACKUP_DIR}
 ################################################################################
 
 DATE=$(date +"%Y%m%d")
@@ -16,7 +16,7 @@ PWD=$(pwd)
 name=$1
 tarfile=$name.$DATE.tar.bz2
 
-ddir="backup" #/mnt/hgfs/backup is requested fo backup tool
+ddir="backup" 
 CUR_DIR=$(pwd -P)
 
 filelist=$*
@@ -62,9 +62,10 @@ function findDir()
 ###
 function backup()
 {
+    echo ${LOVELACE_BACKUP_DIR}
     tar jcvf $tarfile $filelist --exclude-vcs
-    echo "Find \"backup\" int /mnt/hgfs."
-    workdir="/mnt/hgfs"
+    echo "Find \"backup\" in ${LOVELACE_BACKUP_DIR}."
+    workdir=${LOVELACE_BACKUP_DIR}
     findDir $workdir
     echo "Backup tool in \"$backup_dir\""
     rm -vi $backup_dir/${name}.*.tar.bz2
