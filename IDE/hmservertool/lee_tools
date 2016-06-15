@@ -836,9 +836,14 @@ if [ $? = 1 ];then
     PATH=$PATH:$devtool/bin
 fi
 
-##################################################################
-#定时重启
-if [ $USER == "root" ];then
-    /usr/local/bin/auto_server_reboot.sh &
+nginx_run=`ps -aux | grep nginx | awk 'END{print NR}'`
+nginx_run=`expr $nginx_run - 1`
+echo "nginx running process $nginx_run"
+
+if [ -f /usr/bin/nginx ] && [ $nginx_run -lt 1 ];then
+    nginx
 fi
+
+##################################################################
+
 set3.0 #切换到3.0编译环境

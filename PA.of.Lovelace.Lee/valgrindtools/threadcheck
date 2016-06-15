@@ -1,0 +1,4 @@
+#!/bin/sh
+
+
+valgrind --log-file=helgrind_log --tool=helgrind $1
