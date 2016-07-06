@@ -366,9 +366,11 @@ function generatemakefile()
     
     if [[ $liborexec == "exec" ]];then # out put file
         a_out="$4"
-    elif [[ $liborexec == "liba" ]];then
+    elif [[ $liborexec == "liba" ]];then #生成静态库时同时编译动态链接库
         a_out="lib$4.a"
         libldflag=$LDLIBAFLAGS
+        a_outlibso="lib$4.so"
+        libldsoflags=$LDLIBSOFLAGS
     elif [[ $liborexec == "libso" ]];then
         a_out="lib$4.so"
         libldflag=$LDLIBSOFLAGS
@@ -416,6 +418,7 @@ function generatemakefile()
     echo "	@echo \"\"" >> ${main_makefile}
     if [[ $liborexec == "liba" ]];then         #静态库链接
         echo "	$AR $libldflag $RELEASE_DIR${a_out} $OBJSLIST" >> ${main_makefile}
+        echo "	$compiler $libldsoflags $LDFLAGS -o $RELEASE_DIR${a_outlibso} $OBJSLIST $LIBS" >> ${main_makefile}
     else
         echo "	$compiler $libldflag $LDFLAGS -o $RELEASE_DIR${a_out} $OBJSLIST $LIBS" >> ${main_makefile}
     fi
@@ -427,7 +430,7 @@ function generatemakefile()
         echo "	\$(MAKE) \$@ -f $FN_MAKEFILE_PDIR" >> ${main_makefile}
         echo "clean: " >> ${main_makefile}
         echo "	\$(MAKE) \$@ -f $FN_MAKEFILE_PDIR" >> ${main_makefile}
-        echo "	rm -f $RELEASE_DIR${a_out}" >> ${main_makefile}
+        #echo "	rm -f $RELEASE_DIR${a_out}" >> ${main_makefile}
         echo "" >> ${main_makefile}
         echo "distclean: " >> ${main_makefile}
         echo "	\$(MAKE) \$@ -f $FN_MAKEFILE_PDIR" >> ${main_makefile}
@@ -448,7 +451,7 @@ function generatemakefile()
         fi
         echo "	@echo \"\"" >> ${main_makefile}
         echo "	\$(MAKE) \$(BUILDING_DIR) TARGET=\$@" >> ${main_makefile}
-        echo "	rm -f $RELEASE_DIR${a_out}" >> ${main_makefile}
+        #echo "	rm -f $RELEASE_DIR${a_out}" >> ${main_makefile}
         echo "" >> ${main_makefile}
         echo "distclean:" >> ${main_makefile}
         if [ -e $FN_MAKEFILE_PDIR ];then
