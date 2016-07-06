@@ -146,7 +146,7 @@ function getOBJSLIST()
         else
             if [[ ${ford##*.} == $ftype ]];then
                 file=$PWD/$ford
-                objfile=${file%%.*}
+                objfile=${file%*.*}
                 export OBJSLIST=$OBJSLIST,${objfile}.o
                 export OBJSLIST=${OBJSLIST//,/ }
             fi
@@ -170,6 +170,9 @@ function findINCS()
                 findINCS $ford
                 cd ..
             else
+                #findINCS $ford #默认包含所有的子目录
+                export INCS=$INCS,-I\"$PWD/$ford\"
+                export INCS=${INCS//,/ }
                 findINCS $ford
                 cd ..
             fi
@@ -411,7 +414,7 @@ function generatemakefile()
     echo ".PHONY: default all clean distclean build install run \$(BUILDING_DIR)" >> ${main_makefile}
     echo "default: all" >> ${main_makefile}
     echo "	@echo \"\"" >> ${main_makefile}
-    if [[ $liborexec == "liba" ]];then         #静太库链接
+    if [[ $liborexec == "liba" ]];then         #静态库链接
         echo "	$AR $libldflag $RELEASE_DIR${a_out} $OBJSLIST" >> ${main_makefile}
     else
         echo "	$compiler $libldflag $LDFLAGS -o $RELEASE_DIR${a_out} $OBJSLIST $LIBS" >> ${main_makefile}
