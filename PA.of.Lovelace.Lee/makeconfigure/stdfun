@@ -485,8 +485,22 @@ function generatemakefile()
     echo "	\$(MAKE) default" >> ${main_makefile}
     if [ ! $INSTALL_DIR = "" ] && [ ! -d $INSTALL_DIR ];then
         mkdir -p $INSTALL_DIR
+        mkdir -p $INSTALL_DIR/lib
+        mkdir -p $INSTALL_DIR/include
+        mkdir -p $INSTALL_DIR/bin
+        mkdir -p $INSTALL_DIR/doc
     fi
-    echo "	cp -f $RELEASE_DIR${a_out} ${INSTALL_DIR}/" >> ${main_makefile}
+    if [[ $3 == "exec" ]];then
+        echo "	cp -rf $RELEASE_DIR${a_out} ${INSTALL_DIR}/bin" >> ${main_makefile}
+    else
+        echo "	cp -rf $RELEASE_DIR${a_out} ${INSTALL_DIR}/lib" >> ${main_makefile}
+        
+        echo "	cp -rf $RELEASE_DIR${a_outlibso} ${INSTALL_DIR}/lib" >> ${main_makefile}
+    fi
+        
+    echo "	cp -rf $PROJECT_DIR/include ${INSTALL_DIR}/" >> ${main_makefile}
+    
+    echo "	cp -rf $PROJECT_DIR/doc ${INSTALL_DIR}/" >> ${main_makefile}
     echo "	-@echo ' '" >> ${main_makefile}
     
     echo ".SECONDARY: post-build run" >> ${main_makefile}
