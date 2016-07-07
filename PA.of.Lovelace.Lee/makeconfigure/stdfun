@@ -485,11 +485,11 @@ function generatemakefile()
     echo "	\$(MAKE) default" >> ${main_makefile}
     if [ ! $INSTALL_DIR = "" ] && [ ! -d $INSTALL_DIR ];then
         mkdir -p $INSTALL_DIR
-        mkdir -p $INSTALL_DIR/lib
-        mkdir -p $INSTALL_DIR/include
-        mkdir -p $INSTALL_DIR/bin
-        mkdir -p $INSTALL_DIR/doc
     fi
+    mkdir -p $INSTALL_DIR/lib
+    mkdir -p $INSTALL_DIR/include
+    mkdir -p $INSTALL_DIR/bin
+    mkdir -p $INSTALL_DIR/doc
     if [[ $3 == "exec" ]];then
         echo "	cp -rf $RELEASE_DIR${a_out} ${INSTALL_DIR}/bin/" >> ${main_makefile}
     else
