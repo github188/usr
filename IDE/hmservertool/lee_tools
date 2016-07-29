@@ -102,11 +102,11 @@ fi
 function set8161(){
     echo --------------------------------
     if [ -e $devtool/bin ];then
-         echo 
+         echo
         echo -e "$C_BR解除以前工具链接.$C_E"
         unlink $devtool/bin
     fi
-    echo 
+    echo
     echo -e "$C_BR切换到 8161 开发工具链.$C_E"
     ln -s /opt/toolchain/bin/ $devtool/bin
     echo 8161 >$devtool/devplatform
@@ -120,7 +120,7 @@ function set8161(){
     export INC_SDK=""
     show_env
 
-    echo 
+    echo
     echo --------------------------------
 }
 
@@ -131,8 +131,8 @@ function set8180(){
         echo -e "${C_R} 解除以前工具链接.${C_E}"
         unlink $devtool/bin
     fi
-    echo 
-    echo -e "${C_R} 切换到 8180 开发工具链.${C_E}" 
+    echo
+    echo -e "${C_R} 切换到 8180 开发工具链.${C_E}"
     ln -s /opt/crosstool/arm-linux/gcc-3.4.4-glibc-2.3.5/arm-linux/bin/ $devtool/bin
     echo 8180 >$devtool/devplatform
 
@@ -156,8 +156,8 @@ function set8126(){
         echo -e "${C_R} 解除以前工具链接.${C_E}"
         unlink $devtool/bin
     fi
-    echo 
-    echo -e "${C_R} 切换到 8126 开发工具链.${C_E}" 
+    echo
+    echo -e "${C_R} 切换到 8126 开发工具链.${C_E}"
     ln -s /opt/crosstool/arm-none-linux-gnueabi-4.4.0_ARMv5TE/bin/ $devtool/bin
     echo 8126 >$devtool/devplatform
 
@@ -170,7 +170,7 @@ function set8126(){
     export INC_SDK="-I$D_SCHEME/module/include/dvr -I$D_SCHEME/module/include/vcap200_v3 -I$D_SCHEME/module/include/isp210_v2 -I$D_SCHEME/module/include/pwm"
     show_env
 
-    echo 
+    echo
     echo --------------------------------
 }
 
@@ -181,8 +181,8 @@ function set8126N(){
         echo -e "${C_R} 解除以前工具链接.${C_E}"
         unlink $devtool/bin
     fi
-    echo 
-    echo -e "${C_R} 切换到 8126n 开发工具链.${C_E}" 
+    echo
+    echo -e "${C_R} 切换到 8126n 开发工具链.${C_E}"
     ln -s /opt/crosstool/arm-none-linux-gnueabi-4.4.0_ARMv5TE/bin/ $devtool/bin
     echo 8126 >$devtool/devplatform
 
@@ -195,7 +195,7 @@ function set8126N(){
     export INC_SDK="-I$D_SCHEME/module/include/dvr -I$D_SCHEME/module/include/vcap200_v3 -I$D_SCHEME/module/include/isp210_v2 -I$D_SCHEME/module/include/pwm"
     show_env
 
-    echo 
+    echo
     echo --------------------------------
 }
 
@@ -206,8 +206,8 @@ function set3512(){
         echo -e "${C_R} 解除以前工具链接.${C_E}"
         unlink $devtool/bin
     fi
-    echo 
-    echo -e "${C_R} 切换到 3512 开发工具链.${C_E}" 
+    echo
+    echo -e "${C_R} 切换到 3512 开发工具链.${C_E}"
     ln -s /opt/hisi-linux/x86-arm/gcc-3.4.3-uClibc-0.9.28/usr/bin/ $devtool/bin
     echo 3512 >$devtool/devplatform
 
@@ -220,7 +220,7 @@ function set3512(){
     export INC_SDK="-I$D_SCHEME/pub/include -I$D_SCHEME/mpp/include -I$D_SCHEME/mpp/include/mkp -I$D_SCHEME/mpp/sample"
     show_env
 
-    echo 
+    echo
     echo --------------------------------
 }
 
@@ -231,8 +231,8 @@ function set3515(){
         echo -e "${C_R} 解除以前工具链接.${C_E}"
         unlink $devtool/bin
     fi
-    echo 
-    echo -e "${C_R} 切换到 3515 开发工具链.${C_E}" 
+    echo
+    echo -e "${C_R} 切换到 3515 开发工具链.${C_E}"
     ln -s /opt/hisi-linux/x86-arm/gcc-3.4.3-uClibc-0.9.28/usr/bin/ $devtool/bin
     echo 3515 >$devtool/devplatform
 
@@ -245,7 +245,7 @@ function set3515(){
     export INC_SDK="-I$D_SCHEME/pub/include -I$D_SCHEME/mpp/include -I$D_SCHEME/mpp/include/mkp -I$D_SCHEME/mpp/sample"
     show_env
 
-    echo 
+    echo
     echo --------------------------------
 }
 
@@ -256,8 +256,8 @@ function set3520(){
         echo -e "${C_R} 解除以前工具链接.${C_E}"
         unlink $devtool/bin
     fi
-    echo 
-    echo -e "${C_R} 切换到 3520 开发工具链.${C_E}" 
+    echo
+    echo -e "${C_R} 切换到 3520 开发工具链.${C_E}"
     ln -s /opt/hisi-linux/x86-arm/gcc-3.4.3-uClibc-0.9.28/usr/bin/ $devtool/bin
     echo 3520 >$devtool/devplatform
 
@@ -270,7 +270,7 @@ function set3520(){
     export INC_SDK="-I$D_SCHEME/pub/include -I$D_SCHEME/mpp/include -I$D_SCHEME/mpp/include/mkp -I$D_SCHEME/mpp/sample"
     show_env
 
-    echo 
+    echo
     echo --------------------------------
 }
 
@@ -660,7 +660,7 @@ function hmhelp(){
     if [ ! -e $devtool/devplatform ];then
         return 1
     fi
-    
+
     gmplat=""
 
     cat $devtool/devplatform|grep 8161 >/dev/null 2>&1
@@ -678,7 +678,7 @@ function hmhelp(){
         gmplat=8126
     fi
 
-    
+
     cat $devtool/devplatform|grep 3512 >/dev/null 2>&1
     if [ $? = 0 ];then
         gmplat=3512
@@ -688,32 +688,32 @@ function hmhelp(){
     if [ $? = 0 ];then
         gmplat=3515
     fi
-    
+
     cat $devtool/devplatform|grep 3520 >/dev/null 2>&1
     if [ $? = 0 ];then
         gmplat=3520
     fi
-    
+
     cat $devtool/devplatform|grep 3520A >/dev/null 2>&1
     if [ $? = 0 ];then
         gmplat=3520A
     fi
-	
+
 	cat $devtool/devplatform|grep 3521 >/dev/null 2>&1
     if [ $? = 0 ];then
         gmplat=3521
     fi
-    
+
     cat $devtool/devplatform|grep 3518C >/dev/null 2>&1
     if [ $? = 0 ];then
         gmplat=3518C
     fi
-    
+
     cat $devtool/devplatform|grep 3515A >/dev/null 2>&1
     if [ $? = 0 ];then
         gmplat=3515A
     fi
-    
+
     cat $devtool/devplatform|grep 3520D >/dev/null 2>&1
     if [ $? = 0 ];then
         gmplat=3520D
@@ -722,9 +722,9 @@ function hmhelp(){
     #echo -e "${C_R} --------------------------------"
 	echo -e $C_R" --------------------------------"
 	echo
-    echo -e " 当前开发平台为 $gmplat"    
+    echo -e " 当前开发平台为 $gmplat"
 	echo
-	echo -e " 支持平台:"	
+	echo -e " 支持平台:"
 	printf_var $platform
     echo
 	echo -e " SDK目录切换命令:  go\${platform}"
@@ -739,9 +739,9 @@ function hmhelp(){
 	echo -e " command list: "
 	printf_var $command_list
 	echo
- 
+
     echo -e " --------------------------------${C_E}"
-    
+
     if [ -z "$gmplat" ];then
         return 1
     else
@@ -754,12 +754,12 @@ function pwdp(){
 }
 
 function set3.0() {
-    rm /root/.hmdevtool_0/bin; 
+    rm /root/.hmdevtool_0/bin;
     ln -s /opt/toolchain/toolchain_gnueabi-4.4.0_ARMv5TE/bin/ /root/.hmdevtool_0/bin
 }
 
 function scd() {
-	
+
 	if [ $# -ne 1 ];then
 		echo -ne "\n${C_R} 参数错误 scd 版本号 （例如：scd 1.0.1） ${C_E}\n"
 		echo
@@ -798,7 +798,7 @@ function clean_image() {
         if [ -d /opt/nfshost/images ];then
             rm -rvf /opt/nfshost/images/*.fpk
             rm -rvf /opt/nfshost/images/*.image
-        fi  
+        fi
     else
         echo "Usage: clean_image [2.0/3.0]"
     fi
@@ -815,7 +815,7 @@ function update_huamai()
         echo "Usage: update_huamai [gm8136|x86] [huamai_x86|huamai_p1001]"
         return
     fi
-    
+
     cp -Rvf /opt/nfshost/$1/bin/*  /opt/nfshost/RD/$2/app/bin/
     cp -Rvf /opt/nfshost/$1/lib/*  /opt/nfshost/RD/$2/app/lib/
     cp -Rvf /opt/nfshost/$1/module/*  /opt/nfshost/RD/$2/app/module/
