@@ -18,7 +18,7 @@ function gitpush()
     cd $project
     echo -ne "Need push ?[Y/y]: "
     read y
-    if [ $y == "Y" ] || [ $y == "y" ];then
+    if [[ $y == "Y" ]] || [[ $y == "y" ]];then
     git add *
     git commit -a
     git push
