@@ -73,6 +73,11 @@ function workthrough()
 
 ## main
 
+if [ $GITCMD == "help" ] || [ $GITCMD == "--help" ] || [ $GITCMD == "-help" ] || [ $GITCMD == "h" ];then
+    echo "Usage: $0 [status|push|help]"
+    exit
+fi
+
 # show tree
 tree -L 2 -d $GITROOT
 
