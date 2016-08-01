@@ -469,19 +469,21 @@ function generatemakefile()
     echo "build:" >> ${main_makefile}
     echo "	\$(MAKE) clean" >> ${main_makefile}
     echo "	\$(MAKE) default" >> ${main_makefile}
-    echo "run:" >> ${main_makefile}
-    echo "	\$(MAKE) default" >> ${main_makefile}
-    echo "	@echo \"**********************************************\"" >> ${main_makefile}
-    echo "	@echo \"*          Program running result            *\"" >> ${main_makefile}
-    echo "	@echo \"**********************************************\"" >> ${main_makefile}
-    echo "	@$RELEASE_DIR${a_out}" >> ${main_makefile}
-    echo "	@echo \"**********************************************\"" >> ${main_makefile}
+    if [[ $3 == "exec" ]];then #可执行
+        echo "run:" >> ${main_makefile}
+        echo "	\$(MAKE) default" >> ${main_makefile}
+        echo "	@echo \"**********************************************\"" >> ${main_makefile}
+        echo "	@echo \"*          Program running result            *\"" >> ${main_makefile}
+        echo "	@echo \"**********************************************\"" >> ${main_makefile}
+        echo "	@$RELEASE_DIR${a_out}" >> ${main_makefile}
+        echo "	@echo \"**********************************************\"" >> ${main_makefile}
+    fi
     echo "post-build:" >> ${main_makefile}
     if [[ $3 == "exec" ]] && [[ $USESTRIP == Y ]];then #如果是库则不strip
         echo "	$STRIP $RELEASE_DIR${a_out}" >> ${main_makefile}
     fi
     echo "	-@echo ' '" >> ${main_makefile}
-    echo "install:" >> ${main_makefile}
+    echo "install:" >> ${main_makefile} #安装
     echo "	\$(MAKE) default" >> ${main_makefile}
     if [ ! $INSTALL_DIR = "" ] && [ ! -d $INSTALL_DIR ];then
         mkdir -p $INSTALL_DIR
@@ -489,16 +491,18 @@ function generatemakefile()
     mkdir -p $INSTALL_DIR/lib
     mkdir -p $INSTALL_DIR/include
     mkdir -p $INSTALL_DIR/bin
-    mkdir -p $INSTALL_DIR/doc
+    mkdir -p $INSTALL_DIR/doc #创建安装目录完成
     if [[ $3 == "exec" ]];then
         echo "	cp -rf $RELEASE_DIR${a_out} ${INSTALL_DIR}/bin/" >> ${main_makefile}
     else
-        echo "	cp -rf $RELEASE_DIR${a_out} ${INSTALL_DIR}/lib/" >> ${main_makefile}
-        echo "	cp -rf $RELEASE_DIR${a_outlibso} ${INSTALL_DIR}/lib/" >> ${main_makefile}
+        echo "	cp -rf $RELEASE_DIR/* ${INSTALL_DIR}/lib/" >> ${main_makefile}
     fi
-        
+    if [ -d $PROJECT_DIR/include ];then
     echo "	cp -rf $PROJECT_DIR/include ${INSTALL_DIR}/" >> ${main_makefile}
+    fi
+    if [ -d $PROJECT_DIR/doc ];then
     echo "	cp -rf $PROJECT_DIR/doc ${INSTALL_DIR}/" >> ${main_makefile}
+    fi
     
     echo "	-@echo ' '" >> ${main_makefile}
     
