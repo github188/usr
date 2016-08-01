@@ -34,7 +34,7 @@ function gitwork()
     for ford in $list
     do
         if [ -d $ford ];then
-            echo "=========${workdir}/${ford}========="
+            echo "=================================${workdir}/${ford}"
             case $GITCMD in
             status)
                 gitstatus ${workdir}/${ford}
