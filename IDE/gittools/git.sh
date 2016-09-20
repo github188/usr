@@ -1,8 +1,14 @@
 #!/bin/sh
 
+# Foreach git repos in ${GITROOT}
+# Run cmd $GITCMD, supported cmd see function gitwork
 
-GITROOT=/opt/nfshost/serverdisk
+GITROOT=$2
 GITCMD=$1
+
+if [[ $GITROOT == "" ]];then
+    GITROOT=${PWD}
+fi
 
 function gitstatus()
 {
@@ -73,8 +79,8 @@ function workthrough()
 
 ## main
 
-if [ $GITCMD == "help" ] || [ $GITCMD == "--help" ] || [ $GITCMD == "-help" ] || [ $GITCMD == "h" ];then
-    echo "Usage: $0 [status|push|help]"
+if [[ $GITCMD == "help" ]] || [[ $GITCMD == "--help" ]] || [[ $GITCMD == "-help" ]] || [[ $GITCMD == "h" ]];then
+    echo "Usage: $0 [status|push|help] [git root]"
     exit
 fi
 
