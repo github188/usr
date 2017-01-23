@@ -777,6 +777,10 @@ function set3.0() {
     rm /root/.hmdevtool_0/bin;
     ln -s /opt/toolchain/toolchain_gnueabi-4.4.0_ARMv5TE/bin/ /root/.hmdevtool_0/bin
 }
+function set3516() {
+    rm /root/.hmdevtool_0/bin;
+    ln -s /opt/toolchain/arm-hisiv500-linux/bin/ /root/.hmdevtool_0/bin
+}
 
 function scd() {
 
